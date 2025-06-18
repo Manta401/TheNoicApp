@@ -8,46 +8,76 @@ import android.widget.Button
 class MainActivity : Activity() {
 
     private var mediaPlayer: MediaPlayer? = null
+    private var isPaused = false
+    private var currentTrackResId: Int? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        val buttonIds = listOf(
-            R.id.beep1Button, R.id.beep2Button, R.id.beep3Button, R.id.beep4Button, R.id.beep5Button,
-            R.id.beep6Button, R.id.beep7Button, R.id.beep8Button, R.id.beep9Button, R.id.beep10Button
-        )
+        // Inizializza i pulsanti musicali
+        for (i in 1..34) {
+            val buttonId = resources.getIdentifier("beep${i}Button", "id", packageName)
+            val soundId = resources.getIdentifier("beep$i", "raw", packageName)
 
-        val soundIds = listOf(
-            R.raw.beep1, R.raw.beep2, R.raw.beep3, R.raw.beep4, R.raw.beep5,
-            R.raw.beep6, R.raw.beep7, R.raw.beep8, R.raw.beep9, R.raw.beep10
-        )
-
-        buttonIds.zip(soundIds).forEach { (buttonId, soundId) ->
-            findViewById<Button>(buttonId).setOnClickListener {
+            val button = findViewById<Button>(buttonId)
+            button?.setOnClickListener {
                 playSoundInBackground(soundId)
             }
+        }
+
+        // Pulsante Play/Pausa
+        val playPauseButton = findViewById<Button>(R.id.playPauseButton)
+        val stopButton = findViewById<Button>(R.id.stopButton)
+
+        playPauseButton.setOnClickListener {
+            if (mediaPlayer != null) {
+                if (mediaPlayer!!.isPlaying) {
+                    mediaPlayer?.pause()
+                    isPaused = true
+                } else {
+                    mediaPlayer?.start()
+                    isPaused = false
+                }
+            }
+        }
+
+        // Pulsante Stop
+        stopButton.setOnClickListener {
+            stopPlayback()
         }
     }
 
     private fun playSoundInBackground(soundResId: Int) {
-        mediaPlayer?.stop()
-        mediaPlayer?.release()
-        mediaPlayer = null
+        if (currentTrackResId == soundResId && isPaused) {
+            mediaPlayer?.start()
+            isPaused = false
+            return
+        }
+
+        stopPlayback()
 
         mediaPlayer = MediaPlayer.create(this, soundResId)
-        mediaPlayer?.setOnCompletionListener {
-            it.release()
-            mediaPlayer = null
-        }
+        currentTrackResId = soundResId
+        isPaused = false
+
+        mediaPlayer?.isLooping = true  // Loop automatico del brano
+
         mediaPlayer?.start()
 
         moveTaskToBack(true)
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
+    private fun stopPlayback() {
+        mediaPlayer?.stop()
         mediaPlayer?.release()
         mediaPlayer = null
+        isPaused = false
+        currentTrackResId = null
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        stopPlayback()
     }
 }
