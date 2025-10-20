@@ -5,3 +5,6 @@ When opened the app reproduces My Burden is Light in background, to stop it clea
 
 I DONT KNOW HOW GITHUB WORKS ∑|8;.<
 the folders are from the other brench.... Is the updated app i think these are all the file 💙💙💙
+
+Full like app:
+https://github.com/Manta401/TheNoikAppPrivate
